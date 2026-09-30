@@ -26,7 +26,7 @@ Para comparação, o `pi_mpi` (Parte 1) chega a 21,57× com 32 processos. O grá
 ## Estrutura
 
 ```
-ambiente/    scripts da Aula 4 (instala_ambiente.sh, confere_nos.sh, hello_dask.py, ...)
+ambiente/    instalação e verificação do ambiente Python no NFS (instala_ambiente.sh, confere_nos.sh, hello_dask.py, ...)
 pipeline/    pipeline.py, job_corpus.sbatch, sobe_dask.sh, serie_corpus.sh,
              prepara_dataset.py, analisa_corpus.py, plota_curvas.py
 parte1/      código MPI, tabelas dos Blocos 2 e 3, resultados do pi_mpi e respostas do 4.4

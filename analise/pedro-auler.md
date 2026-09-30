@@ -111,17 +111,15 @@ O caminho até os números teve vários problemas, registrados aqui:
 5. **Corpus pequeno demais** (AG News, 11,9 s com 1 worker): substituído antes da série.
 6. **Série de 09/09 do `pi_mpi` sem controle de posição** e com jobs concorrentes: refeita.
 
-Lição geral: a abstração do Dask (Aula 4) esconde as mensagens do MPI, mas **não remove o custo de mover dados**; ele só passa a aparecer como serialização, agregação e scheduler. E medir com honestidade exigiu conferir a plataforma (memória, montagem, posição dos processos) antes de interpretar qualquer curva.
+Lição geral: a abstração do Dask esconde as mensagens do MPI, mas **não remove o custo de mover dados**; ele só passa a aparecer como serialização, agregação e scheduler. E medir com honestidade exigiu conferir a plataforma (memória, montagem, posição dos processos) antes de interpretar qualquer curva.
 
 ### 6.1 Cronologia das tentativas e dificuldades
 
 | Fase | O que aconteceu | Resultado ou decisão |
 |---|---|---|
-| Aula 4 (18/09) | O `sed` que troquei nos caminhos do `dask` deixou o `job_hello_dask.sbatch` corrompido (`--cpus-per-ta[Ask=1`). Para o hello funcionar, o script foi ajustado à mão: `--cpus-per-task=2`, 2 workers por nó, caminhos absolutos, `--memory-limit 0`, sem `--exclusive`. | `hello-dask` com `CHECKPOINT OK` (jobs 97 e 107, 8 workers em 4 nós). O ajuste era um contorno, não a causa (ver o item 3 acima). |
-| Aula 4 (18/09) | O `pi_dask` (Bloco 4) gerou só 1 das 5 linhas pedidas (32 tarefas, 580 ms por tarefa, job 103); o `wordcount` (job 106) foi cancelado por tempo limite. | Ficaram incompletos; hoje se sabe que os workers estavam com 128 KiB de memória. |
-| 30/09, retomada | Os 4 nós estavam `DOWN` desde o reboot de 25/09, embora estivessem de pé (NFS, `munge`, `slurmd` e `chronyd` ativos). | `scontrol update ... state=resume`. |
-| 30/09, `hello-dask` | O job 111 (e o 113) caía em 1 s, sem saída, com `RaisedSignal:53`. | Causa: `/opt` montado `ro` nos nós. Passei a rodar em `/home/test`. |
-| 30/09, `hello-dask` | O job 114 subiu, mas 0 de 16 workers chegaram (workers reiniciando, `Memory: 128.00 kiB`). Contornei com `--memory-limit 0` e o job 115 deu `CHECKPOINT OK` com 16 workers (4 por nó). | Era o sintoma do `RealMemory` ausente. |
+| Preparação do ambiente | Os 4 nós estavam `DOWN` desde o reboot de 25/09, embora estivessem de pé (NFS, `munge`, `slurmd` e `chronyd` ativos). | `scontrol update ... state=resume`. |
+| Preparação do ambiente | O job 111 (e o 113) caía em 1 s, sem saída, com `RaisedSignal:53`. | Causa: `/opt` montado `ro` nos nós. Passei a rodar em `/home/test`. |
+| Preparação do ambiente | O job 114 subiu, mas 0 de 16 workers chegaram (workers reiniciando, `Memory: 128.00 kiB`). Contornei com `--memory-limit 0` e o job 115 deu `CHECKPOINT OK` com 16 workers (4 por nó). | Era o sintoma do `RealMemory` ausente (item 3). |
 | Pipeline, primeira versão | O script de dataset falhou (`np.array_split` devolve arrays, não DataFrames); no corpus sintético de teste o tokenizador descartava os dígitos e o vocabulário caía para 1 termo. | Corrigidos; o sintético serviu só para testar o código. |
 | Pipeline, testes | Os jobs 117 e 119 (1 worker, 20 mil documentos sintéticos) travavam na etapa `df` com "Couldn't gather keys" em loop. | Causa: `RLIMIT_RSS` de 1024 KB por causa do `RealMemory` ausente (buffer máximo do Dask de 512 KiB). Ver o item 3. |
 | Pipeline, testes | O `tfidf` levou 174 s para 20 mil documentos. | Perfil local: `Future` resolvido por documento. `map_partitions` deu 0,3 s. |
