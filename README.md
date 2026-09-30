@@ -21,7 +21,7 @@ Módulo HPC, Inteli 2026.2. Prof. João Luisi.
 
 ![curvas](resultados/curvas.png)
 
-Enquanto o `pi_mpi` chega a 21,6× com 32 processos (f ≈ 1,3%), o pipeline chega a só 1,21×. As etapas estreitas escalam, mas as etapas largas (contagem de documentos por termo e estatísticas), que movem dicionários de ~196 mil termos entre processos, **ficam mais lentas já com 2 workers** e ocupam mais de 80% do tempo. O ajuste de Amdahl degenera porque o speedup é menor que 1. Detalhes e discussão dos gargalos: `analise/`.
+Para comparação, o `pi_mpi` (Parte 1) chega a 21,57× com 32 processos. O gráfico acima mostra as três curvas pedidas (corpus, `pi_mpi` e linear ideal). A discussão dos gargalos e a estimativa da fração serial pela lei de Amdahl estão nas análises individuais, em `analise/`.
 
 ## Estrutura
 
