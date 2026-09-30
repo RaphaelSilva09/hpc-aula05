@@ -91,6 +91,24 @@ Escada de configurações: 1, 2 e 4 workers em 1 nó; 8 em 2 nós (4 por nó); 1
 
 Definições dos CSVs (formato da Aula 3: `nprocs,nnodes,t_total,t_serial,t_calc`): `t_calc` = etapas estreitas (tokenização, stopwords, TF, TF-IDF); `t_serial` = `t_total − t_calc`; o tempo conta depois do `wait_for_workers`. `resultados/speedup.csv` (`pi_mpi`) usa o **menor** tempo de 2 rodadas, e `speedup_corpus.csv` usa a **mediana** de 3. Os arquivos `parte1/resultados/*0909*` vêm de uma série anterior, sem posição controlada e com jobs concorrentes, e não foram usados.
 
+## Como cada integrante adiciona a sua análise
+
+A análise individual fica em `analise/<nome-sobrenome>.md` (uma por integrante, escrita por cada um; os números do grupo estão em `analise/DADOS-DO-GRUPO.md`).
+
+1. Faça um **fork** deste repositório (botão *Fork* no GitHub) e clone o seu fork:
+   ```bash
+   git clone https://github.com/<seu-usuario>/hpc-aula05.git && cd hpc-aula05
+   ```
+2. Crie o seu arquivo `analise/<nome-sobrenome>.md` e faça commit e push no seu fork:
+   ```bash
+   git add analise/<nome-sobrenome>.md
+   git commit -m "Analise individual: <nome>"
+   git push origin main
+   ```
+3. Abra um **Pull Request** do seu fork para `pedroauler12/hpc-aula05` (branch `main`). O dono do repositório faz o merge, e a análise passa a fazer parte do repositório entregue.
+
+Alternativa sem fork: peça ao dono do repositório para adicionar você em *Settings → Collaborators* e faça o push direto.
+
 ## Segurança
 
 Nunca comite a `munge.key`; não abra as portas 8786 e 8787 no Wi-Fi (use túnel SSH); o scheduler roda dentro do job e morre com ele; leia os scripts antes de rodar com `sudo`.
