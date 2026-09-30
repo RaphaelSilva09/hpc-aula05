@@ -145,8 +145,15 @@ Lição geral: a abstração do Dask esconde as mensagens do MPI, mas **não rem
 
 Duas correções minhas ao longo do caminho, que registro por honestidade: (a) escrevi que o Karp-Flatt indicava "overhead crescente", mas ele **decresce** (2,45 a 0,82), e corrigi; (b) uma sequência de testes em segundo plano deixou uma linha de resultado sintético no CSV do corpus, que apaguei antes da série.
 
-### 6.2 Observações sobre a Parte 1 (relatório do grupo)
-Conferi os números do relatório contra as saídas originais do cluster, e o ping-pong e o `soma_reduce` batem. Três pontos que eu revisaria: (1) o ganho de 25,7% do π em 4 nós contra 1 nó é atribuído a cache L3 e limites térmicos, mas 8 processos em 1 nó são as 8 CPUs lógicas de 4 cores físicos, ou seja, **SMT**; (2) no `soma_reduce`, 1 e 2 processos deram o mesmo tempo (0,478 s), o que sugere os dois processos nas threads do mesmo core; (3) a latência de 0,24 µs no mesmo nó é muito baixa para uma ida e volta e a comparação com o PCIe é frágil.
+### 6.2 Batimento com o relatório da Parte 1
+
+Conferi o relatório do grupo (Aula 3) contra as saídas originais do cluster, número por número. **Batem:** a tabela do ping-pong (0,24 / 0,36 / 125,24 µs no mesmo nó e 235,37 / 221,33 / 19.560,92 µs entre nós), as razões (980,7×, 614,8×, 156,2×), os 107,2 MB/s (85,8% do gigabit), o `soma_reduce` (0,478 / 0,478 / 0,241 / 0,129 / 0,033 s, com 73,0%, 3,71×, 74,4%, 3,91× e 14,48×), o job 62 (0,240 s) e o π com 8 processos (6,272 s em 1 nó contra 4,659 s em 4 nós, ganho de 25,7% e 1,35×).
+
+Quatro pontos em que o texto ia além do que a saída mostrava:
+1. **32 processos "8 por nó".** A saída só mostrava `c[1-4]`. Confirmei com o job 168: 8 processos em cada um dos 4 nós.
+2. **`MPI_Allreduce` "disponível em cada processo".** O código já usava o `Allreduce`, mas só o rank 0 imprimia o total. Ajustei o programa para todos os ranks imprimirem e rodei (job 167): os 4 ranks mostram 2000000001000000000.
+3. **A explicação do π em 1 nó contra 4 nós.** O relatório atribui o ganho a cache L3 e limites térmicos. Os números apontam para o **SMT**: 4 processos em 1 nó levaram 9,39 s e 8 no mesmo nó levaram 6,27 s (só 1,5× de ganho por dobrar os processos, contra ~2× esperado), enquanto 8 processos em 4 nós (2 por nó) levaram 4,66 s. Oito processos em 1 nó ocupam as 8 CPUs lógicas de 4 cores físicos. Cache e térmica podem contribuir, mas não medi.
+4. **Comparação com o PCIe e a latência de 0,24 µs.** A aritmética está certa, mas 0,24 µs é muito baixo para uma ida e volta e a comparação com o PCIe é frágil. Registro o valor medido com essa cautela. Ainda há o `soma_reduce` com 1 e 2 processos com o mesmo tempo (0,478 s), que sugere os dois processos nas duas threads do mesmo core; o mapeamento desse job não foi verificado.
 
 ### 6.3 Lições aprendidas
 

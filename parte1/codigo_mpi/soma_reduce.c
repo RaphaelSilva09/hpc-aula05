@@ -41,6 +41,9 @@ int main(int argc, char **argv) {
     long long total = 0, p = parcial;
     MPI_Allreduce(&parcial, &total, 1, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
 
+    /* mini desafio: com MPI_Allreduce TODOS os ranks tem o total, entao todos imprimem */
+    printf("rank %2d: total (Allreduce) = %lld\n", rank, total);
+
     if (rank == 0) {
         long long esperado = N * (N + 1) / 2;
         printf("total    = %lld\n", total);

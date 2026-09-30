@@ -24,4 +24,8 @@ Números extraídos das saídas originais do cluster, que estão neste repositó
 
 Repetições com 4 processos: job 53 (0,257 s) e job 62 (0,240 s), este último com o `MPI_Allreduce` do mini desafio.
 
-Observação: com 2 processos o rank 0 somou metade do intervalo e levou o mesmo tempo que com 1 (0,478 s). Isso sugere que os dois processos caíram nas duas threads do mesmo core (SMT), e não em dois cores. Vale confirmar o mapeamento no `SLURM_JOB_NODELIST` e nos `--hint`.
+**Mini desafio (job 167, 4 processos, `soma-167.out`):** com `MPI_Allreduce`, **todos os ranks** têm o total e todos o imprimem (`rank N: total (Allreduce) = 2000000001000000000`, para N = 0 a 3). No job 62 só o rank 0 imprimia.
+
+**Distribuição com 32 processos (job 168, `distribuicao-32-168.out`):** 8 processos em cada um dos nós c1, c2, c3 e c4.
+
+Observação: com 2 processos o rank 0 somou metade do intervalo e levou o mesmo tempo que com 1 (0,478 s). Isso sugere que os dois processos caíram nas duas threads do mesmo core (SMT), e não em dois cores. Não foi verificado o mapeamento desse job.
