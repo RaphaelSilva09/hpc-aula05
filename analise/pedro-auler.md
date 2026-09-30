@@ -136,6 +136,17 @@ Duas correções minhas ao longo do caminho, que registro por honestidade: (a) e
 ### 6.2 Observações sobre a Parte 1 (relatório do grupo)
 Conferi os números do relatório contra as saídas originais do cluster, e o ping-pong e o `soma_reduce` batem. Três pontos que eu revisaria: (1) o ganho de 25,7% do π em 4 nós contra 1 nó é atribuído a cache L3 e limites térmicos, mas 8 processos em 1 nó são as 8 CPUs lógicas de 4 cores físicos, ou seja, **SMT**; (2) no `soma_reduce`, 1 e 2 processos deram o mesmo tempo (0,478 s), o que sugere os dois processos nas threads do mesmo core; (3) a latência de 0,24 µs no mesmo nó é muito baixa para uma ida e volta e a comparação com o PCIe é frágil.
 
+### 6.3 Lições aprendidas
+
+1. **Conferir a plataforma antes de interpretar qualquer curva.** Nós marcados `DOWN`, `/opt` somente leitura e um `slurm.conf` sem `RealMemory` já teriam produzido números sem sentido. A curva só passou a valer depois de checar memória, montagem e posição dos processos.
+2. **Isolar uma variável por vez, com testes pequenos.** O teste de payload (10 KB a 5 MB) mostrou que a coleta falhava entre 300 KB e 1 MB; `ulimit -H -m` dentro do job revelou o limite de 1024 KB; o `client.run` foi medido contra outras três formas de enviar o IDF, e cada variante tinha uma linha de resultado.
+3. **Ler o traceback do lado certo.** O log do worker mostrava só `Connection reset by peer`; a causa (`StreamBufferFullError`) estava no log do scheduler.
+4. **Conferir que a otimização não muda o resultado.** A troca do método de enviar o IDF foi validada comparando o resultado com o método simples em 120.000 documentos (idêntico).
+5. **Verificar que o que roda é o que se pensa que roda.** O `cp` interativo do shell não copiou o script restaurado, e o job 111 executou a versão antiga. Só percebi comparando os arquivos com `diff`; depois passei a usar `\cp -f` e a checar o resultado.
+6. **Corpus e memória andam juntos.** O corpus precisa ser grande o bastante para o caso de 1 worker levar dezenas de segundos, e pequeno o bastante para caber na RAM de um nó (~4 GB livres). Por isso 300.000 resenhas e a liberação das etapas intermediárias (`del`).
+7. **Medir uma série exige encadeamento e posição controlada.** Jobs concorrentes e processos sem `-N` e `--ntasks-per-node` invalidaram a série de 09/09; o CSV fora de ordem foi o indício.
+8. **Uma curva ruim é resultado, não erro.** O speedup abaixo de 1 tem explicação (custo de serialização), e o ajuste de Amdahl que degenera é uma informação sobre o modelo.
+
 ## 7. Limites do que conclui
 
 - Esta é a **v1** do pipeline. Usei `frequencies` e `reduction` com os parâmetros padrão do Dask; uma agregação distribuída por termo, sem juntar dicionários inteiros num único ponto, pode reduzir o custo de `df` e `stats`. **Não medi** isso.
