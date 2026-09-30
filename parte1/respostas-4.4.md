@@ -1,4 +1,4 @@
-# Parte 1: as cinco respostas do item 4.4 (RASCUNHO para revisão do grupo)
+# Parte 1: as cinco respostas do item 4.4
 
 Base: `parte1/resultados/speedup.csv` (série de 30/09, posição controlada por `speedup_2rodadas.sh`, 2 rodadas, menor tempo por ponto, 4 bilhões de pontos).
 
