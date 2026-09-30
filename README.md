@@ -95,19 +95,18 @@ Definições dos CSVs (formato da Aula 3: `nprocs,nnodes,t_total,t_serial,t_calc
 
 A análise individual fica em `analise/<nome-sobrenome>.md` (uma por integrante, escrita por cada um; os números do grupo estão em `analise/DADOS-DO-GRUPO.md`).
 
-1. Faça um **fork** deste repositório (botão *Fork* no GitHub) e clone o seu fork:
-   ```bash
-   git clone https://github.com/<seu-usuario>/hpc-aula05.git && cd hpc-aula05
-   ```
-2. Crie o seu arquivo `analise/<nome-sobrenome>.md` e faça commit e push no seu fork:
-   ```bash
-   git add analise/<nome-sobrenome>.md
-   git commit -m "Analise individual: <nome>"
-   git push origin main
-   ```
-3. Abra um **Pull Request** do seu fork para `pedroauler12/hpc-aula05` (branch `main`). O dono do repositório faz o merge, e a análise passa a fazer parte do repositório entregue.
+Os integrantes são colaboradores do repositório e podem dar **push direto na `main`**. Aceite o convite recebido por e-mail (ou em github.com/notifications) e faça:
 
-Alternativa sem fork: peça ao dono do repositório para adicionar você em *Settings → Collaborators* e faça o push direto.
+```bash
+git clone https://github.com/pedroauler12/hpc-aula05.git && cd hpc-aula05
+# crie analise/<nome-sobrenome>.md
+git add analise/<nome-sobrenome>.md
+git commit -m "Analise individual: <nome>"
+git pull --rebase origin main     # se outro integrante enviou antes, o push seria recusado
+git push origin main
+```
+
+Se o push for recusado (`rejected`), rode de novo `git pull --rebase origin main` e depois `git push origin main`. Não use `--force`.
 
 ## Segurança
 
