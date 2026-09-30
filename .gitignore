@@ -1,0 +1,14 @@
+# NUNCA comitar segredos
+munge.key
+*.key
+.ssh/
+# artefatos de execucao
+scheduler-*.json
+workers-*.log
+scheduler-*.log
+__pycache__/
+pylib/
+*.pyc
+# dados grandes (ficam no NFS do cluster, nao no repositorio)
+dados*/
+*.parquet

@@ -1,0 +1,17 @@
+cluster Dask: 1 nos x 1 workers = 1 | scheduler em c1:8786 | painel em c1:8787
+workers: 1 | nos: 1 | particoes: 128 | dados: /opt/ohpc/pub/grupo/dados/agnews
+  subida do cluster (fora do t_total): 3.3 s
+  leitura      1.910 s
+  tokeniza     1.080 s
+  stopwords    0.550 s
+  tf           0.541 s
+  df           2.055 s
+  tfidf        3.456 s
+  stats        2.306 s
+
+documentos: 120,000 | vocabulario: 61,488 termos
+maiores TF-IDF (soma): new=2515.0, ap=2454.7, said=2228.1, reuters=2189.2, quot=1621.5, gt=1515.0, lt=1509.7, year=1491.2, world=1392.8, oil=1277.9, company=1227.1, microsoft=1172.7, monday=1142.8, wednesday=1138.3, iraq=1131.7
+distribuicao de tamanho (tokens uteis/10 -> docs): 0:147, 10:28805, 20:73616, 30:13484, 40:2804, 50:630, 60:330, 70:90 ...
+
+t_total 11.907 s | t_calc (estreitas) 5.627 s | t_serial 6.280 s
+CSV,1,1,11.9074,6.2802,5.6272,0,1.9100,1.0799,0.5496,0.5414,2.0552,3.4563,2.3057,3.33

@@ -1,0 +1,17 @@
+cluster Dask: 1 nos x 2 workers = 2 | scheduler em c1:8786 | painel em c1:8787
+workers: 2 | nos: 1 | particoes: 128 | dados: /opt/ohpc/pub/grupo/dados/amazon
+  subida do cluster (fora do t_total): 2.9 s
+  leitura      1.736 s
+  tokeniza     2.520 s
+  stopwords    1.194 s
+  tf           1.278 s
+  df          17.475 s
+  tfidf        0.936 s
+  stats       23.456 s
+
+documentos: 300,000 | vocabulario: 196,361 termos
+maiores TF-IDF (soma): book=12501.7, great=7942.8, movie=7406.0, good=7193.2, read=6251.4, like=6161.5, just=5678.5, time=4814.1, love=4541.7, really=4317.0, cd=4252.8, don=4141.8, best=4019.1, product=3870.0, buy=3743.3
+distribuicao de tamanho (tokens uteis/10 -> docs): 0:5135, 10:67303, 20:61675, 30:50036, 40:39774, 50:30276, 60:22617, 70:16070 ...
+
+t_total 48.634 s | t_calc (estreitas) 5.928 s | t_serial 42.707 s
+CSV,2,1,48.6343,42.7067,5.9276,1,1.7359,2.5202,1.1941,1.2777,17.4748,0.9356,23.4560,2.91
