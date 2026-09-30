@@ -113,6 +113,31 @@ O caminho até os números teve vários problemas, registrados aqui:
 
 Lição geral: a abstração do Dask (Aula 4) esconde as mensagens do MPI, mas **não remove o custo de mover dados**; ele só passa a aparecer como serialização, agregação e scheduler. E medir com honestidade exigiu conferir a plataforma (memória, montagem, posição dos processos) antes de interpretar qualquer curva.
 
+### 6.1 Cronologia das tentativas e dificuldades
+
+| Fase | O que aconteceu | Resultado ou decisão |
+|---|---|---|
+| Aula 4 (18/09) | O `sed` que troquei nos caminhos do `dask` deixou o `job_hello_dask.sbatch` corrompido (`--cpus-per-ta[Ask=1`). Para o hello funcionar, o script foi ajustado à mão: `--cpus-per-task=2`, 2 workers por nó, caminhos absolutos, `--memory-limit 0`, sem `--exclusive`. | `hello-dask` com `CHECKPOINT OK` (jobs 97 e 107, 8 workers em 4 nós). O ajuste era um contorno, não a causa (ver o item 3 acima). |
+| Aula 4 (18/09) | O `pi_dask` (Bloco 4) gerou só 1 das 5 linhas pedidas (32 tarefas, 580 ms por tarefa, job 103); o `wordcount` (job 106) foi cancelado por tempo limite. | Ficaram incompletos; hoje se sabe que os workers estavam com 128 KiB de memória. |
+| 30/09, retomada | Os 4 nós estavam `DOWN` desde o reboot de 25/09, embora estivessem de pé (NFS, `munge`, `slurmd` e `chronyd` ativos). | `scontrol update ... state=resume`. |
+| 30/09, `hello-dask` | O job 111 (e o 113) caía em 1 s, sem saída, com `RaisedSignal:53`. | Causa: `/opt` montado `ro` nos nós. Passei a rodar em `/home/test`. |
+| 30/09, `hello-dask` | O job 114 subiu, mas 0 de 16 workers chegaram (workers reiniciando, `Memory: 128.00 kiB`). Contornei com `--memory-limit 0` e o job 115 deu `CHECKPOINT OK` com 16 workers (4 por nó). | Era o sintoma do `RealMemory` ausente. |
+| Pipeline, primeira versão | O script de dataset falhou (`np.array_split` devolve arrays, não DataFrames); no corpus sintético de teste o tokenizador descartava os dígitos e o vocabulário caía para 1 termo. | Corrigidos; o sintético serviu só para testar o código. |
+| Pipeline, testes | Os jobs 117 e 119 (1 worker, 20 mil documentos sintéticos) travavam na etapa `df` com "Couldn't gather keys" em loop. | Causa: `RLIMIT_RSS` de 1024 KB por causa do `RealMemory` ausente (buffer máximo do Dask de 512 KiB). Ver o item 3. |
+| Pipeline, testes | O `tfidf` levou 174 s para 20 mil documentos. | Perfil local: `Future` resolvido por documento. `map_partitions` deu 0,3 s. |
+| Enunciado da atividade | Li o enunciado oficial e vi que as quatro etapas são **separadas** (tokenização, stopwords, TF-IDF, estatísticas); eu tinha juntado tokenização e stopwords. | Separei as stopwords em uma etapa própria. |
+| Corpus | AG News (120.000 documentos): 1 worker deu **11,9 s** (job 146). Substituí por 300.000 resenhas do Amazon Polarity: **27,8 s** (job 148). | Corpus decidido antes da série e mantido nas 18 execuções. |
+| Corpus | A primeira calibração no Amazon (job 147) passou de 10 minutos na etapa `tfidf`: o dicionário do IDF (196 mil termos) como argumento das tarefas não escalava. | Cancelei o job e usei `client.run` (0,17 s, resultado idêntico). |
+| Parte 1 | Os resultados do `pi_mpi` **não estavam** no relatório em PDF nem em `resultados/speedup.csv` completo. Achei as saídas dos jobs 54 a 59 no cluster (09/09), sem `speedup.csv` e com o CSV fora de ordem. | A série de 09/09 não tinha posição controlada e rodou concorrente. Refiz com `speedup_2rodadas.sh` (jobs 134 a 145). |
+| Série do corpus | Jobs 149 a 166 (18 execuções). | Speedup de 0,58 a 1,21, com a análise das seções 3 a 5. |
+| Infraestrutura | Sem `pdftotext` no master (li os PDFs com `pypdf` numa pasta temporária); matplotlib instalado só em `~/aula05/pylib`, fora do ambiente compartilhado; `git` e `gh` instalados no master. | O ambiente `hpc` do NFS não foi alterado. |
+| Entrega | Repositório público `hpc-aula05` criado na conta pessoal. O primeiro push foi recusado porque o GitHub já tinha um commit inicial (README de 2 linhas); integrei por cima, sem `--force`. | Commits sem coautor; um único README (como pede o enunciado). |
+
+Duas correções minhas ao longo do caminho, que registro por honestidade: (a) escrevi que o Karp-Flatt indicava "overhead crescente", mas ele **decresce** (2,45 a 0,82), e corrigi; (b) uma sequência de testes em segundo plano deixou uma linha de resultado sintético no CSV do corpus, que apaguei antes da série.
+
+### 6.2 Observações sobre a Parte 1 (relatório do grupo)
+Conferi os números do relatório contra as saídas originais do cluster, e o ping-pong e o `soma_reduce` batem. Três pontos que eu revisaria: (1) o ganho de 25,7% do π em 4 nós contra 1 nó é atribuído a cache L3 e limites térmicos, mas 8 processos em 1 nó são as 8 CPUs lógicas de 4 cores físicos, ou seja, **SMT**; (2) no `soma_reduce`, 1 e 2 processos deram o mesmo tempo (0,478 s), o que sugere os dois processos nas threads do mesmo core; (3) a latência de 0,24 µs no mesmo nó é muito baixa para uma ida e volta e a comparação com o PCIe é frágil.
+
 ## 7. Limites do que conclui
 
 - Esta é a **v1** do pipeline. Usei `frequencies` e `reduction` com os parâmetros padrão do Dask; uma agregação distribuída por termo, sem juntar dicionários inteiros num único ponto, pode reduzir o custo de `df` e `stats`. **Não medi** isso.
