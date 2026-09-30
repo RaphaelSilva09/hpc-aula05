@@ -1,0 +1,8 @@
+job 137: 8 processos em 2 no(s): c[1-2]
+[prun] Master compute host = c1
+[prun] Resource manager = slurm
+[prun] Launch cmd = srun --mpi=pmix -- ./pi_mpi 4000000000 (family=openmpi5)
+4000000000 pontos, 8 processos em 2 no(s)
+pi estimado = 3.14161149   erro = 1.88e-05
+tempo: total 4.758 s | calculo (max) 4.753 s | arranque+reducao 0.005 s
+CSV,8,2,4.7577,0.0047,4.7530
