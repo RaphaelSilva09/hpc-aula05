@@ -46,7 +46,7 @@ logs_serie/  saída dos 18 jobs da série
 | Formato e idioma | Parquet com uma coluna `texto` (título + conteúdo); inglês |
 | Local no cluster | `/opt/ohpc/pub/grupo/dados/amazon` (visível nos 4 nós) |
 
-Licença e citação: a confirmar no cartão do dataset. SHA-256 do arquivo original: `57c367f8c74210dde3742b17d103af33820df3af39d029f2a5051a6f87810661`.
+Licença: Apache License 2.0 (cartão do dataset no Hugging Face). Citação: McAuley, J.; Leskovec, J. *Hidden factors and hidden topics: understanding rating dimensions with review text.* Proceedings of the 7th ACM Conference on Recommender Systems, pp. 165-172, 2013. SHA-256 do arquivo original: `57c367f8c74210dde3742b17d103af33820df3af39d029f2a5051a6f87810661`.
 
 **Por que não o AG News:** foi o primeiro corpus escolhido (`fancyzhx/ag_news`, 120.000 notícias, 18 MB, inglês), mas um teste de calibração com 1 worker e 128 partições (`calibracao/`) deu **11,9 s**, dos quais 53% já eram etapas que não escalam. Com esse tamanho os custos fixos dominariam a curva. O Amazon Polarity (300.000 resenhas) deu **27,8 s**. O corpus foi decidido **antes** da série e **não mudou** entre as configurações. O subconjunto é de 300.000 documentos (e não os 900.000 do arquivo) por causa da memória: cada nó tem ~4,1 GB livres.
 
