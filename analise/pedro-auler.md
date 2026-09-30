@@ -103,7 +103,7 @@ S(p) = 1 / (f + (1 − f)/p), ou seja, 1/S é uma reta em 1/p e o intercepto é 
 
 ## 6. Problemas encontrados e o que aprendi
 
-O caminho até os números teve vários problemas, todos documentados no README:
+O caminho até os números teve vários problemas, registrados aqui:
 1. **Nós `DOWN`** depois do reboot de 25/09: era só estado do SLURM (`scontrol update ... state=resume`).
 2. **`/opt` montado somente leitura nos nós** (perfil do Warewulf): o job caía em 1 s, sem saída, por não conseguir criar o arquivo de saída. Passei a rodar em `/home` (leitura e escrita).
 3. **`slurm.conf` sem `RealMemory`:** o SLURM assumia 1 MB por nó, aplicava `RLIMIT_RSS` de 1024 KB aos jobs e o Dask lia esse limite: workers com 128 KiB de memória e qualquer resultado maior que ~512 KiB voltando ao cliente falhava (`StreamBufferFullError`, com o cliente em loop de "Couldn't gather keys"). `--memory-limit 0`, `--mem=0`, `--propagate=NONE` e `ulimit` não resolveram. A correção foi `RealMemory=7000` e `scontrol reconfigure`.

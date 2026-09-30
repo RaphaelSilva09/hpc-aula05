@@ -31,8 +31,7 @@ pipeline/    pipeline.py, job_corpus.sbatch, sobe_dask.sh, serie_corpus.sh,
              prepara_dataset.py, analisa_corpus.py, plota_curvas.py
 parte1/      código MPI, tabelas dos Blocos 2 e 3, resultados do pi_mpi e respostas do 4.4
 resultados/  CSVs (speedup.csv do pi_mpi, corpus_bruto.csv, speedup_corpus.csv) e gráficos
-analise/     análises individuais (<nome>.md) e DADOS-DO-GRUPO.md
-docs/        DATASET.md e PROBLEMAS.md (detalhes)
+analise/     análises individuais (<nome>.md) e DADOS-DO-GRUPO.md (números do grupo)
 calibracao/  testes de 1 worker que justificaram a escolha do corpus
 logs_serie/  saída dos 18 jobs da série
 ```
@@ -47,7 +46,9 @@ logs_serie/  saída dos 18 jobs da série
 | Formato e idioma | Parquet com uma coluna `texto` (título + conteúdo); inglês |
 | Local no cluster | `/opt/ohpc/pub/grupo/dados/amazon` (visível nos 4 nós) |
 
-O AG News foi testado primeiro e descartado por ser pequeno demais (1 worker: 11,9 s). Ver `docs/DATASET.md`.
+Licença e citação: a confirmar no cartão do dataset. SHA-256 do arquivo original: `57c367f8c74210dde3742b17d103af33820df3af39d029f2a5051a6f87810661`.
+
+**Por que não o AG News:** foi o primeiro corpus escolhido (`fancyzhx/ag_news`, 120.000 notícias, 18 MB, inglês), mas um teste de calibração com 1 worker e 128 partições (`calibracao/`) deu **11,9 s**, dos quais 53% já eram etapas que não escalam. Com esse tamanho os custos fixos dominariam a curva. O Amazon Polarity (300.000 resenhas) deu **27,8 s**. O corpus foi decidido **antes** da série e **não mudou** entre as configurações. O subconjunto é de 300.000 documentos (e não os 900.000 do arquivo) por causa da memória: cada nó tem ~4,1 GB livres.
 
 ## Ambiente
 
@@ -55,7 +56,7 @@ Master + 4 nós (c1 a c4, Intel Core i3-13100T: 4 cores × 2 threads, 7,6 GB de 
 
 ## Como reproduzir do zero
 
-0. **SLURM:** em `/etc/slurm/slurm.conf`, o `NodeName=c[1-4]` precisa de `RealMemory=7000`; depois `scontrol reconfigure`. Sem isso o Dask não funciona neste cluster (ver `docs/PROBLEMAS.md`).
+0. **SLURM:** em `/etc/slurm/slurm.conf`, o `NodeName=c[1-4]` precisa de `RealMemory=7000`; depois `scontrol reconfigure`. Sem isso o SLURM assume 1 MB por nó, aplica um limite de memória de 1 MB aos jobs, e o Dask falha ao devolver resultados maiores que ~500 KB ao cliente (`StreamBufferFullError`).
 1. **Cluster de pé:** `sinfo` com c[1-4] `idle`; NFS montado (`srun -N 4 df -h /opt/ohpc/pub`).
 2. **Código:** clone este repositório em uma pasta **gravável e visível nos 4 nós**. Aqui, `/opt` é somente leitura nos nós; use `/home/<usuario>/`.
 3. **Ambiente Python no NFS:** `cd ambiente && sudo ./instala_ambiente.sh` (leia o script antes) e `./confere_nos.sh` (4 linhas iguais).
@@ -88,7 +89,7 @@ Master + 4 nós (c1 a c4, Intel Core i3-13100T: 4 cores × 2 threads, 7,6 GB de 
 
 Escada de configurações: 1, 2 e 4 workers em 1 nó; 8 em 2 nós (4 por nó); 16 em 4 nós (4 por nó); 32 em 4 nós (8 por nó, SMT).
 
-Definições dos CSVs (formato da Aula 3: `nprocs,nnodes,t_total,t_serial,t_calc`): `t_calc` = etapas estreitas (tokenização, stopwords, TF, TF-IDF); `t_serial` = `t_total − t_calc`; o tempo conta depois do `wait_for_workers`.
+Definições dos CSVs (formato da Aula 3: `nprocs,nnodes,t_total,t_serial,t_calc`): `t_calc` = etapas estreitas (tokenização, stopwords, TF, TF-IDF); `t_serial` = `t_total − t_calc`; o tempo conta depois do `wait_for_workers`. `resultados/speedup.csv` (`pi_mpi`) usa o **menor** tempo de 2 rodadas, e `speedup_corpus.csv` usa a **mediana** de 3. Os arquivos `parte1/resultados/*0909*` vêm de uma série anterior, sem posição controlada e com jobs concorrentes, e não foram usados.
 
 ## Segurança
 
