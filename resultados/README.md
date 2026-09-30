@@ -9,6 +9,6 @@
 | `curvas.png` | gráfico de 3 curvas: speedup do corpus, speedup do `pi_mpi` e linear ideal (eixo x em log₂) |
 | `speedup_pi_mpi.png` | gráfico de speedup da Parte 1 (saída do `analisa_speedup.py`) |
 
-Definições de `t_total`, `t_serial` e `t_calc` do corpus: ver o README da raiz (seção Pipeline).
+Definições de `t_total`, `t_serial` e `t_calc` do corpus: ver o README da raiz (final da seção "Como reproduzir do zero").
 A estatística usada difere entre as partes: o `pi_mpi` usa o **menor** tempo (roteiro da Aula 3) e o corpus usa a **mediana** (enunciado da Parte 2).
 As estatísticas do corpus (vocabulário, distribuição de tamanho, termos de maior TF-IDF) são impressas nos logs de cada execução, em `logs_serie/`.
