@@ -60,6 +60,18 @@ Dispersão entre as 3 rodadas (máximo menos mínimo, sobre a mediana): 1% com 1
 
 A distância entre as curvas vem de uma diferença de natureza. O `pi_mpi` não lê arquivo, não troca dados durante o cálculo e só faz um `Reduce` no fim (`t_serial` de milésimos de segundo). O pipeline lê do NFS, agrega um vocabulário inteiro e devolve resultados ao cliente. Para cada gargalo pedido:
 
+**A distância entre as curvas, em números** (speedup do `pi_mpi` menos o do corpus) e o que domina o tempo do corpus em cada ponto:
+
+| workers | `pi_mpi` | corpus | distância | o que domina o tempo do corpus |
+|---|---|---|---|---|
+| 2 | 1,99 | 0,58 | 1,41 | `df` + `stats` = 83% (serialização, ainda dentro do mesmo nó) |
+| 4 | 3,69 | 0,72 | 2,97 | `df` + `stats` = 85% |
+| 8 | 7,33 | 0,81 | 6,52 | `df` + `stats` = 81%; primeiro ponto com 2 nós |
+| 16 | 14,78 | 1,01 | 13,77 | `df` + `stats` = 74% e leitura = 17% (o maior peso do I/O) |
+| 32 | 21,57 | 1,21 | 20,36 | `df` + `stats` = 81%; SMT (2 workers por core) |
+
+A distância cresce com p porque o `pi_mpi` continua ganhando com mais processos, enquanto o corpus fica preso à parte que não escala. Cada gargalo abaixo diz onde entra nessa distância.
+
 ### 4.1 I/O no NFS
 - **Onde aparece:** a etapa de leitura **não diminui** com mais workers: 2,25 s (1), 1,72 (2), 1,67 (4), 2,71 (8), **4,56 (16)**, 2,13 (32). Com 16 workers ela vale 17% do `t_total`.
 - **Número que prova:** os 83 MB do corpus custariam ~0,8 s no cabo gigabit do master (83 MB ÷ 107 MB/s medidos no ping-pong), e a leitura mede de 2 a 6 vezes isso. Ler não escala porque todos os leitores saem do mesmo master por um único cabo.
